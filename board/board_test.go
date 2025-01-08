@@ -41,3 +41,14 @@ func TestBitManipulation(t *testing.T) {
 		t.Errorf("Expected bitboard for square 0: %064b, got: %064b", expected, squareToBitboard(0))
 	}
 }
+
+func TestToFEN(t *testing.T) {
+	cb := NewChessBoard()
+
+	fen := cb.ToFEN("w", "KQkq", "-", 0, 1)
+	expectedFEN := "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+
+	if fen != expectedFEN {
+		t.Errorf("Expected FEN: %s, got: %s", expectedFEN, fen)
+	}
+}

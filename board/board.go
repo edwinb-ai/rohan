@@ -2,6 +2,8 @@ package board
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 )
 
 type Bitboard uint64
@@ -107,4 +109,91 @@ func (cb ChessBoard) PrintBoard() {
 		}
 		fmt.Println()
 	}
+}
+
+// A function to take the state of the board and create a FEN string
+func (b ChessBoard) ToFEN(activePlayer string, castlingRights string, enPassant string, halfMoveClock int, fullMoveNumber int) string {
+	var fen strings.Builder
+	allPieces := map[string]Bitboard{
+		"P": b.WhitePawns,
+		"N": b.WhiteKnights,
+		"B": b.WhiteBishops,
+		"R": b.WhiteRooks,
+		"Q": b.WhiteQueens,
+		"K": b.WhiteKing,
+		"p": b.BlackPawns,
+		"n": b.BlackKnights,
+		"b": b.BlackBishops,
+		"r": b.BlackRooks,
+		"q": b.BlackQueens,
+		"k": b.BlackKing,
+	}
+
+	// A loop for the piece placement
+	for rank := 7; rank >= 0; rank-- {
+		emptyCount := 0
+		for file := 0; rank < 8; file++ {
+			square := rank*8 + file
+			found := false
+
+			// We check each piece bitboard to determine the piece on the
+			// actual board
+			for pieceName, bitboard := range allPieces {
+				if isBitSet(bitboard, square) {
+					if emptyCount > 0 {
+						fen.WriteString(strconv.Itoa(emptyCount))
+						emptyCount = 0
+					}
+					fen.WriteString(pieceName)
+					found = true
+					break
+				}
+			}
+
+			// If no piece is found, increment the empty counter
+			if !found {
+				emptyCount++
+			}
+		}
+
+		// Add empty square count at the end of the rank
+		if emptyCount > 0 {
+			fen.WriteString(strconv.Itoa(emptyCount))
+		}
+
+		// Add a slash at the end of the rank, except at the last rank
+		if rank > 0 {
+			fen.WriteString("/")
+		}
+	}
+
+	// Who is the active player
+	fen.WriteString(" ")
+	fen.WriteString(activePlayer)
+
+	// Castling rights
+	fen.WriteString(" ")
+	if castlingRights == "" {
+		fen.WriteString("-")
+	} else {
+		fen.WriteString(castlingRights)
+	}
+
+	// En passant target square
+	fen.WriteString(" ")
+	if enPassant == "" {
+		fen.WriteString("-")
+	} else {
+		fen.WriteString(enPassant)
+	}
+
+	// Half-move clock
+	fen.WriteString(" ")
+	fen.WriteString(strconv.Itoa(halfMoveClock))
+
+	// Full move number
+	fen.WriteString(" ")
+	fen.WriteString(strconv.Itoa(fullMoveNumber))
+
+	return fen.String()
 }
