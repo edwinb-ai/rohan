@@ -19,3 +19,17 @@ func isBitSet(bb Bitboard, square int) bool {
 func squareToBitboard(square int) Bitboard {
 	return 1 << square
 }
+
+// Combine all bitboards for occupied squares
+func (cb ChessBoard) OccupiedSquares() Bitboard {
+	return cb.WhitePawns | cb.WhiteKnights | cb.WhiteBishops | cb.WhiteRooks | cb.WhiteQueens | cb.WhiteKing |
+		cb.BlackPawns | cb.BlackKnights | cb.BlackBishops | cb.BlackRooks | cb.BlackQueens | cb.BlackKing
+}
+
+// Combine all opponent pieces (for capture calculations)
+func (cb ChessBoard) OpponentPieces(isWhite bool) Bitboard {
+	if isWhite {
+		return cb.BlackPawns | cb.BlackKnights | cb.BlackBishops | cb.BlackRooks | cb.BlackQueens | cb.BlackKing
+	}
+	return cb.WhitePawns | cb.WhiteKnights | cb.WhiteBishops | cb.WhiteRooks | cb.WhiteQueens | cb.WhiteKing
+}

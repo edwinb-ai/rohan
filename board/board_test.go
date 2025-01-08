@@ -52,3 +52,28 @@ func TestToFEN(t *testing.T) {
 		t.Errorf("Expected FEN: %s, got: %s", expectedFEN, fen)
 	}
 }
+
+func TestGeneratePawnMoves(t *testing.T) {
+	cb := NewChessBoard()
+
+	// Test White Pawn Moves
+	occupied := cb.OccupiedSquares()
+	opponent := cb.OpponentPieces(true) // White is moving
+	moves := generatePawnMoves(cb.WhitePawns, occupied, opponent, true)
+
+	// Expected: White pawns can move forward one square from rank 2
+	expected := Bitboard(0x0000000000FF0000) // Rank 3
+	if moves != expected {
+		t.Errorf("Expected white pawn moves: %064b, got: %064b", expected, moves)
+	}
+
+	// Test Black Pawn Moves
+	opponent = cb.OpponentPieces(false) // Black is moving
+	moves = generatePawnMoves(cb.BlackPawns, occupied, opponent, false)
+
+	// Expected: Black pawns can move forward one square from rank 7
+	expected = Bitboard(0x0000FF0000000000) // Rank 6
+	if moves != expected {
+		t.Errorf("Expected black pawn moves: %064b, got: %064b", expected, moves)
+	}
+}
