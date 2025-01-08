@@ -112,34 +112,36 @@ func (cb ChessBoard) PrintBoard() {
 }
 
 // A function to take the state of the board and create a FEN string
-func (b ChessBoard) ToFEN(activePlayer string, castlingRights string, enPassant string, halfMoveClock int, fullMoveNumber int) string {
+func (cb ChessBoard) ToFEN(activePlayer string, castlingRights string, enPassant string, halfMoveClock int, fullMoveNumber int) string {
 	var fen strings.Builder
+
+	// Combine all bitboards to detect occupied squares
 	allPieces := map[string]Bitboard{
-		"P": b.WhitePawns,
-		"N": b.WhiteKnights,
-		"B": b.WhiteBishops,
-		"R": b.WhiteRooks,
-		"Q": b.WhiteQueens,
-		"K": b.WhiteKing,
-		"p": b.BlackPawns,
-		"n": b.BlackKnights,
-		"b": b.BlackBishops,
-		"r": b.BlackRooks,
-		"q": b.BlackQueens,
-		"k": b.BlackKing,
+		"P": cb.WhitePawns,
+		"N": cb.WhiteKnights,
+		"B": cb.WhiteBishops,
+		"R": cb.WhiteRooks,
+		"Q": cb.WhiteQueens,
+		"K": cb.WhiteKing,
+		"p": cb.BlackPawns,
+		"n": cb.BlackKnights,
+		"b": cb.BlackBishops,
+		"r": cb.BlackRooks,
+		"q": cb.BlackQueens,
+		"k": cb.BlackKing,
 	}
 
-	// A loop for the piece placement
+	// Piece Placement
 	for rank := 7; rank >= 0; rank-- {
 		emptyCount := 0
-		for file := 0; rank < 8; file++ {
+		for file := 0; file < 8; file++ {
 			square := rank*8 + file
 			found := false
 
-			// We check each piece bitboard to determine the piece on the
-			// actual board
+			// Check if the square is occupied by a piece
 			for pieceName, bitboard := range allPieces {
-				if isBitSet(bitboard, square) {
+				if (bitboard & (1 << square)) != 0 {
+					// If empty squares preceded, add the count to the FEN
 					if emptyCount > 0 {
 						fen.WriteString(strconv.Itoa(emptyCount))
 						emptyCount = 0
@@ -150,24 +152,24 @@ func (b ChessBoard) ToFEN(activePlayer string, castlingRights string, enPassant 
 				}
 			}
 
-			// If no piece is found, increment the empty counter
+			// Count empty squares
 			if !found {
 				emptyCount++
 			}
 		}
 
-		// Add empty square count at the end of the rank
+		// Add any trailing empty squares
 		if emptyCount > 0 {
 			fen.WriteString(strconv.Itoa(emptyCount))
 		}
 
-		// Add a slash at the end of the rank, except at the last rank
+		// Add a slash after every rank except the last
 		if rank > 0 {
 			fen.WriteString("/")
 		}
 	}
 
-	// Who is the active player
+	// Active player
 	fen.WriteString(" ")
 	fen.WriteString(activePlayer)
 
